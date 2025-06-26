@@ -70,5 +70,6 @@ else:
 
 with st.expander("📋 전체 전략표 보기"):
     st.table(df)  # ✅ 여기도 dataframe 말고 table
+    
 else:
     st.info("ℹ️ 현재가와 손절가를 정확히 입력해주세요 (손절가는 현재가보다 작아야 합니다).")
