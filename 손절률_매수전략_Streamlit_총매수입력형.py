@@ -2,11 +2,14 @@ import streamlit as st
 import pandas as pd
 import locale
 
-# 한국식 천 단위 콤마 적용
+# 한국식 숫자 포맷 설정
 locale.setlocale(locale.LC_ALL, '')
 
 def format_number(num):
-    return locale.format_string("%d", num, grouping=True)
+    try:
+        return locale.format_string("%d", num, grouping=True)
+    except:
+        return num
 
 def parse_number(s):
     try:
@@ -14,7 +17,7 @@ def parse_number(s):
     except:
         return 0
 
-# 매수전략 데이터
+# 매수 전략 테이블 정의
 data = {
     '손절률(%)': list(range(3, 26)),
     '매수비중(%)': [
@@ -25,33 +28,39 @@ data = {
 }
 df = pd.DataFrame(data)
 
-st.title("💹손절률 기반 매수전략")
+st.title("💹 손절률 기반 매수 전략 시뮬레이터")
 
-# 👇 입력값을 문자열로 받되 콤마 표기 유지
-col1, col2, col3 = st.columns(3)
-
+# 🎯 입력 (왼쪽: 입력창, 오른쪽: 콤마 표시)
+col1, col2 = st.columns(2)
 with col1:
-    총매수금액_raw = st.text_input("총 매수금액 (₩)", format_number(1000000))
+    총매수금액_raw = st.text_input("총 매수금액 (₩)", "1000000")
     총매수금액 = parse_number(총매수금액_raw)
-
 with col2:
-    현재가_raw = st.text_input("현재가", format_number(38025))
-    현재가 = parse_number(현재가_raw)
+    st.markdown(f"🧾 포맷된 금액: **{format_number(총매수금액)}원**")
 
+col3, col4 = st.columns(2)
 with col3:
-    손절가_raw = st.text_input("손절가", format_number(35050))
-    손절가 = parse_number(손절가_raw)
+    현재가_raw = st.text_input("현재가", "38025")
+    현재가 = parse_number(현재가_raw)
+with col4:
+    st.markdown(f"💰 현재가: **{format_number(현재가)}**")
 
-# 👉 손절률 계산
+col5, col6 = st.columns(2)
+with col5:
+    손절가_raw = st.text_input("손절가", "35050")
+    손절가 = parse_number(손절가_raw)
+with col6:
+    st.markdown(f"🔻 손절가: **{format_number(손절가)}**")
+
+# 📉 손절률 계산
 if 현재가 > 0 and 손절가 > 0 and 손절가 < 현재가:
     손절률 = round((현재가 - 손절가) / 현재가 * 100, 2)
     st.markdown(f"### 📉 손절률: **{손절률}%**")
 
-    # 👉 매수금액 계산 후 콤마포맷
+    # 💡 전략 계산
     df["매수금액"] = ((df["매수비중(%)"] / 100) * 총매수금액).round().astype(int)
-    df["매수금액"] = df["매수금액"].apply(lambda x: f"{x:,}")
+    df["매수금액"] = df["매수금액"].apply(lambda x: format_number(x))
 
-    # 👉 손절률에 해당하는 전략 추출
     추천 = df[df["손절률(%)"] == round(손절률)]
     if not 추천.empty:
         st.success("💡 해당 손절률의 매수 전략")
