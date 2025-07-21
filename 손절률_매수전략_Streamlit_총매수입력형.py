@@ -31,7 +31,7 @@ st.title("💹 매도를 잘하자")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    총매수금액_raw = st.text_input("총 매수금액 (₩)", format_number(100000000))
+    총매수금액_raw = st.text_input("총 매수금액 (₩)", format_number(100,000,000))
     총매수금액 = parse_number(총매수금액_raw)
 
 with col2:
